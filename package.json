@@ -1,6 +1,6 @@
 {
   "name": "simplemmo.js",
-  "version": "0.1",
+  "version": "0.1.1",
   "description": "An API wrapper for SimpleMMO",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
