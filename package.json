@@ -1,0 +1,30 @@
+{
+  "name": "simplemmo.js",
+  "version": "0.1",
+  "description": "An API wrapper for SimpleMMO",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/da-strange-boi/simplemmo.js.git"
+  },
+  "author": "da-strange-boi",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/da-strange-boi/simplemmo.js/issues"
+  },
+  "homepage": "https://github.com/da-strange-boi/simplemmo.js#readme",
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.11",
+    "@typescript-eslint/eslint-plugin": "^4.28.3",
+    "@typescript-eslint/parser": "^4.28.3",
+    "eslint": "^7.31.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}

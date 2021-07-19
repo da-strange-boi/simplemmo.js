@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "removeComments": false,
+        "module": "commonjs",
+        "target": "ESNext",
+        "sourceMap": false,
+        "pretty": true,
+        "declaration": true,
+        "outDir": "dist/"
+    },
+    "include": [
+        "src/*"
+    ]
+}
