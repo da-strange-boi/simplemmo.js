@@ -1,8 +1,8 @@
-# BETA 0.1.1
+## BETA 0.2.0
 
 API wrapper for the game [SimpleMMO](https://web.simple-mmo.com/)
 
-# Install
-```
+## Install
+```bash
 $ npm install simplemmo.js
 ```

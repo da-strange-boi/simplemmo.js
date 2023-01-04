@@ -1,247 +1,223 @@
-import fetch from 'node-fetch'
-import { URLSearchParams } from 'url'
+import axios from 'axios';
+import { URLSearchParams } from 'url';
+import {
+    PlayerInformationResponse,
+    YourInformationResponse,
+    PlayerEquippedItemsResponse,
+    PlayerSkillsResponse,
+    DiamondMarketResponse,
+    OrphanageResponse,
+    WorldBossesResponse,
+    GuildInformationResponse,
+    ItemInformationResponse,
+    ListOfGuildsResponse,
+    GuildMembersResponse,
+    GuildWarsResponse,
+    SimpleMMOError
+} from './types';
 
-interface PlayerInformationResponse {
-    id: number,
-    name: string,
-    level: number,
-    motto: string,
-    profile_number: string,
-    exp: number,
-    gold: number,
-    steps: number,
-    npc_kills: number,
-    user_kills: number,
-    quests_complete: number,
-    dex: number,
-    def: number,
-    str: number,
-    bonus_dex: number,
-    bonus_def: number,
-    bonus_str: number,
-    hp: number,
-    max_hp: number,
-    energy?: number,
-    max_energy?: number,
-    safeMode: number,
-    safeModeTime: string | null,
-    background: number,
-    membership: number,
-    guild?: {
-        id: number,
-        name: string
-    }
-}
-
-interface PlayerEquippedItems {
-    item_id: number,
-    name: string,
-    type: string,
-    description: string,
-    stat1: string,
-    stat1modifier: number,
-    stat2: string,
-    stat2modifier: number,
-    stat3: string,
-    stat4modifier: number,
-}
-
-interface PlayerSkillsResponse {
-    skill: string,
-    level: number,
-    exp: number
-}
-
-interface WorldBosses {
-    id: number,
-    name: string,
-    avatar: string,
-    level: number,
-    god: number,
-    str: number,
-    def: number,
-    dex: number,
-    current_hp: number,
-    max_hp: number,
-    enable_time: number
-}
-
-interface GuildInformation {
-    id: number,
-    name: string,
-    tag: string,
-    owner: number,
-    exp: number,
-    passive: number,
-    icon: string
-}
-
-interface ItemInformation {
-    id: number,
-    name: string,
-    type: string,
-    description: string,
-    equipable: string,
-    level: number,
-    rarity: string,
-    value: number,
-    stat1: string,
-    stat1modifier: number,
-    stat2: string,
-    stat2modifier: number,
-    stat3: string,
-    stat4modifier: number,
-    custom_item: number,
-    tradable: number,
-    locked: number
-}
-
-interface ListOfGuilds {
-    current_page: number,
-    data: GuildInformation[],
-    first_page_url: string,
-    from: number,
-    next_page_url: string,
-    path: string,
-    per_page: number,
-    prev_page_url: string|null,
-    to: number
-}
-
-interface GuildMember {
-    user_id: number,
-    position: string,
-    name: string,
-    level: number,
-    safe_mode: number,
-    current_hp: number,
-    max_hp: number
-}
-
-interface SimpleMMOError {
-    error: string
-}
+const API_BASE = "https://api.simple-mmo.com/v1";
 
 class SimpleMMO {
-    apiKey: string
-    auth: URLSearchParams
-    baseUri: string = 'https://api.simple-mmo.com/v1/'
+    apiKey: string;
+    auth: URLSearchParams;
 
+    /**
+     * 
+     * @param apiKey 
+     */
     constructor (apiKey: string) {
-      this.apiKey = apiKey
-      this.auth = new URLSearchParams(`api_key=${this.apiKey}`)
+      this.apiKey = apiKey;
+      this.auth = new URLSearchParams(`api_key=${this.apiKey}`);
     }
 
-    async playerInformation (playerID: number|string): Promise<PlayerInformationResponse|SimpleMMOError> {
-        return fetch(`${this.baseUri}player/info/${playerID}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as PlayerInformationResponse
-        })
+    /**
+     * 
+     * @param error 
+     * @returns 
+     */
+    handleError(error: unknown): SimpleMMOError {
+        if (axios.isAxiosError(error)) {
+            return error.response?.data as SimpleMMOError;
+        } else {
+            throw error;
+        }
     }
 
-    async playerEquippedItems (playerID: number|string): Promise<PlayerEquippedItems[]|SimpleMMOError> {
-        return fetch(`${this.baseUri}player/equipment/${playerID}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as PlayerEquippedItems[]
-        })
+    /**
+     * 
+     * @param playerID 
+     * @returns 
+     */
+    async playerInformation(playerID: number | string): Promise<PlayerInformationResponse|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/player/info/${playerID}`, this.auth);
+            const data: PlayerInformationResponse = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 
-    async playerSkills (playerID: number|string): Promise<PlayerSkillsResponse[]|SimpleMMOError> {
-        return fetch(`${this.baseUri}player/skills/${playerID}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as PlayerSkillsResponse[]
-        })
+    /**
+     * 
+     * @returns 
+     */
+    async yourInformation(): Promise<YourInformationResponse|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/player/me`, this.auth);
+            const data: YourInformationResponse = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 
-    async worldBosses (): Promise<WorldBosses[]|SimpleMMOError> {
-        return fetch(`${this.baseUri}worldboss/all`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as WorldBosses[]
-        })
+    /**
+     * 
+     * @param playerID 
+     * @returns 
+     */
+    async playerEquippedItems(playerID: number | string): Promise<PlayerEquippedItemsResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/player/equipment/${playerID}`, this.auth);
+            const data: PlayerEquippedItemsResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 
-    async itemInformation (itemID: number|string): Promise<ItemInformation|SimpleMMOError> {
-        return fetch(`${this.baseUri}item/info/${itemID}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as ItemInformation
-        })
+    /**
+     * 
+     * @param playerID 
+     * @returns 
+     */
+    async playerSkills(playerID: number | string): Promise<PlayerSkillsResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/player/skills/${playerID}`, this.auth);
+            const data: PlayerSkillsResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 
-    async listOfGuilds (page?: number|string): Promise<ListOfGuilds|SimpleMMOError> {
-        return fetch(`${this.baseUri}guilds/all?page=${page || 1}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as ListOfGuilds
-        })
+    /**
+     * 
+     * @returns 
+     */
+    async diamondMarket(): Promise<DiamondMarketResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/diamond-market`, this.auth);
+            const data: DiamondMarketResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 
-    async guildInformation (guildID: number|string): Promise<GuildInformation|SimpleMMOError> {
-        return fetch(`${this.baseUri}guilds/info/${guildID}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as GuildInformation
-        })
+    /**
+     * 
+     * @returns 
+     */
+    async orphanage(): Promise<OrphanageResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/diamond-market`, this.auth);
+            const data: OrphanageResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 
-    async guildMembers (guildID: number|string): Promise<GuildMember[]|SimpleMMOError> {
-        return fetch(`${this.baseUri}guilds/members/${guildID}`, {
-            method: 'POST',
-            body: this.auth
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.error) {
-                return res as SimpleMMOError
-            }
-            return res as GuildMember[]
-        })
+    /**
+     * 
+     * @returns 
+     */
+    async worldBosses(): Promise<WorldBossesResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/worldboss/all`, this.auth);
+            const data: WorldBossesResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * 
+     * @param itemID 
+     * @returns 
+     */
+    async itemInformation(itemID: number|string): Promise<ItemInformationResponse|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/item/info/${itemID}`, this.auth);
+            const data: ItemInformationResponse = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * 
+     * @param page 
+     * @returns 
+     */
+    async listOfGuilds(page?: number|string): Promise<ListOfGuildsResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/guilds/all?page=${page || 1}}`, this.auth);
+            const data: ListOfGuildsResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * 
+     * @param guildID 
+     * @returns 
+     */
+    async guildInformation(guildID: number|string): Promise<GuildInformationResponse|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/guilds/info/${guildID}`, this.auth);
+            const data: GuildInformationResponse = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * 
+     * @param guildID 
+     * @returns 
+     */
+    async guildMembers(guildID: number|string): Promise<GuildMembersResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/guilds/members/${guildID}`, this.auth);
+            const data: GuildMembersResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * 
+     * @param guildID 
+     * @returns 
+     */
+    async guildWars(guildID: number|string): Promise<GuildWarsResponse[]|SimpleMMOError> {
+        try {
+            const res = await axios.post(API_BASE + `/guilds/wars/${guildID}/4`, this.auth);
+            const data: GuildWarsResponse[] = res.data;
+            return data;
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 }
 
